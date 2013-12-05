@@ -1,0 +1,13 @@
+{
+  "name": "boxds-updates-cassandra",
+  "version": "0.0.1",
+  "description": "Cassandra plugin for boxds's updates store.",
+  "author": "Liam Doherty",
+  "main": "updates",
+  "dependencies": {
+    "helenus": "~0.6.4",
+    "node-uuid": "~1.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {}
+}
