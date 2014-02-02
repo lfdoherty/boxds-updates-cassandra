@@ -4,6 +4,17 @@ var uuid = require('node-uuid');
 var emptyBuffer = new Buffer(0)
 
 exports.make = function(pool){
+
+	pool.execute('CREATE TABLE boxds_updates ('+
+		'key varchar,'+
+		'sequence_id int,'+
+		'source_id timeuuid,'+
+		'data blob,'+
+		'PRIMARY KEY (key,sequence_id)'+
+	');', function(){
+	})
+
+
 	return {
 		get: function(name, lastSequenceId, cb){//sourceId, cb){
 			if(typeof(lastSequenceId) !== 'number') throw new Error('lastSequenceId missing or not a number: ' + lastSequenceId)
