@@ -21,7 +21,6 @@ exports.make = function(pool){
 			//if(typeof(sourceId) !== 'string') throw new Error('sourceId missing or not a string: ' + sourceId)
 			if(typeof(cb) !== 'function') throw new Error('cb missing or not a function: ' + cb)
 			
-			//console.log('getting after: ' + lastSequenceId)
 
 			pool.execute('SELECT sequence_id,source_id,data FROM boxds_updates WHERE key = ? AND sequence_id > ?', [name, lastSequenceId], 1, function(err, result){
 				try{
@@ -29,15 +28,18 @@ exports.make = function(pool){
 						console.log('ERROR: ' + err)
 						cb(err)
 					}else{
+
+						//console.log('got after: ' + lastSequenceId + ' ' + name + ' ' + result.rows.length)
+						
 						var all = []
 						if(result.rows.length === 0){
 							cb(undefined, all)
 						}else{
-							var highest = result.rows[result.rows.length-1][0]
+							var highest = result.rows[result.rows.length-1].sequence_id
 							for(var i=0;i<result.rows.length;++i){
 								var row = result.rows[i]
 								//if(row[1] === sourceId) continue
-								all.push({sourceId: row[1], data: row[2]})//{sequenceId: row[0], data: row[2]})
+								all.push({sourceId: row.source_id, data: row.data})//{sequenceId: row[0], data: row[2]})
 							}
 							cb(undefined, all, highest)
 						}
@@ -64,9 +66,9 @@ exports.make = function(pool){
 						throw err
 					}
 					try{
-						//console.log(JSON.stringify(result))
+						
 						//retry with higher sequence id if necessary
-						if(!result.rows[0][0]){
+						if(!result.rows[0]['[applied]']){
 							//console.log('retrying: ' + (sequenceId+1))
 							if(failIfGreater){
 								if(tryCount > 5){
@@ -78,9 +80,15 @@ exports.make = function(pool){
 									return
 								}
 							}
+							if(tryCount> 20){
+								console.log(JSON.stringify(result))
+								console.log('failed 20 times to insert update ' + sequenceId + ' ' + name)
+								console.log('ERROR: ' + new Error().stack)
+								return
+							}
 							trySequencing(sequenceId+1)
 						}else{
-							console.log('done: ' + sequenceId + ' ' + tryCount + ' in ' + (Date.now() - start) + 'ms ' + name)
+							//console.log('done: ' + sequenceId + ' ' + tryCount + ' in ' + (Date.now() - start) + 'ms ' + name)
 							if(cb) cb()
 						}
 					}catch(e){
