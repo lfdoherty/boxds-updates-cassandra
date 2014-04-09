@@ -80,9 +80,9 @@ exports.make = function(pool){
 									return
 								}
 							}
-							if(tryCount> 20){
+							if(tryCount> 120){
 								console.log(JSON.stringify(result))
-								console.log('failed 20 times to insert update ' + sequenceId + ' ' + name)
+								console.log('failed 120 times to insert update ' + sequenceId + ' ' + name)
 								console.log('ERROR: ' + new Error().stack)
 								return
 							}
